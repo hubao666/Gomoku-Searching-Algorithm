@@ -1,9 +1,11 @@
 from graphics import * 
+import numpy as np
 
 BOX_WIDTH = 50
 NUM_COLUMN = 15
 NUM_ROW = 15
 CHESS_RADIUS = 20
+CONNECT_N = 5
 
 player1_list = []  
 player2_list = []  
@@ -26,6 +28,36 @@ def create_window():
 
 
 
+def game_over(player_list):
+    '''
+    Algorithm from
+    https://cs.stackexchange.com/questions/86999/how-to-validate-a-connect-x-game-tick-tak-toe-gomoku
+    I think it's really cool
+    '''
+    matrix = np.zeros((NUM_ROW, NUM_COLUMN))
+    for row, col in player_list:
+        matrix[row, col] = 1
+
+    weights = np.array([2**i for i in range(NUM_ROW)])
+    win_values = [sum(weights[i:i+CONNECT_N]) for i in range(len(weights) - CONNECT_N + 1)]
+
+    ### Horiziontal
+    if any(value in win_values for value in np.dot(matrix, weights)):
+        return True
+    
+    ### Vertical
+    if any(value in win_values for value in np.dot(matrix.T, weights)):
+        return True
+
+    ### implement diagonal direction
+
+    return False
+
+
+
+
+
+
 def play_the_chess():
     window = create_window()
 
@@ -33,7 +65,7 @@ def play_the_chess():
     is_gameOver = False
 
     while not is_gameOver:
-        if turn % 2 == 1:
+        if turn % 2 == 0:
             pos1 = window.getMouse()
             pos1_X = round((pos1.getX()) / BOX_WIDTH)
             pos1_Y = round((pos1.getY()) / BOX_WIDTH)
@@ -46,7 +78,10 @@ def play_the_chess():
                 piece.setFill('black')
                 piece.draw(window)
 
-                # check if game is over
+                if game_over(player1_list):
+                    message = Text(Point(600, 40), "black win.")
+                    message.draw(window)
+                    is_gameOver = True
 
                 turn += 1
 
@@ -63,9 +98,16 @@ def play_the_chess():
                 piece.setFill('white')
                 piece.draw(window)
 
-                # check if game is over
+                if game_over(player2_list):
+                    message = Text(Point(600, 40), "white win.")
+                    message.draw(window)
+                    is_gameOver = True
 
                 turn += 1
 
+    window.getMouse()
+    window.close()
+
 
 play_the_chess()
+
