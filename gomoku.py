@@ -1,11 +1,13 @@
 from graphics import * 
 import numpy as np
 
-BOX_WIDTH = 50
-NUM_COLUMN = 15
-NUM_ROW = 15
-CHESS_RADIUS = 20
+SIZE = 15
 CONNECT_N = 5
+BOX_WIDTH = 50
+NUM_COLUMN = SIZE
+NUM_ROW = SIZE
+CHESS_RADIUS = 20
+
 
 player1_list = []  
 player2_list = []  
