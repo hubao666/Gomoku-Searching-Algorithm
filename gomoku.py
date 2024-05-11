@@ -15,6 +15,7 @@ NUM_COLUMN = SIZE
 NUM_ROW = SIZE
 CHESS_RADIUS = 20           # radius of chess
 
+KEEP_PLAYING = True
 
 player1_list = []  
 player2_list = []  
@@ -105,7 +106,7 @@ def play_the_chess():
     '''
     main function that starts the game
     '''
-    
+
     window = create_window()
 
     turn = 0
@@ -160,18 +161,21 @@ def play_the_chess():
     window.getMouse()
     window.close()
 
+    KEEP_PLAYING = False
+    return
+
 # ----------------------------------------------------------------------------
 ### IGNORE IT: There are still error with background music
-# from playsound import playsound
-# import threading
+from playsound import playsound
+import threading
 
-# def play_music():
-#     while True:
-#         playsound('music.mp3')
+def play_music():
+    while KEEP_PLAYING:
+        playsound('music.mp3')
 
-# thread = threading.Thread(target=play_music)
-# thread.start()
+thread = threading.Thread(target=play_music)
+thread.start()
 # ----------------------------------------------------------------------------
 
 play_the_chess()
-
+thread.close()
