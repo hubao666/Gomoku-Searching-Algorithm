@@ -17,6 +17,8 @@ player2_list = []
 all_list = []  
 
 
+
+
 def create_window():
     # Create the game board 
     window = GraphWin("Gomoku", BOX_WIDTH * NUM_COLUMN, BOX_WIDTH * NUM_ROW)
@@ -31,6 +33,8 @@ def create_window():
         line.draw(window)
 
     return window
+
+
 
 
 
@@ -94,8 +98,66 @@ def game_over(player_list):
     return False
 
 
+# -----------------------------------------------------------------------------------------------------
+### May 19th
+
+def ai_pos():
+    next_pos = []
+    alpha = -float('inf')
+    beta = float('inf')
+    _, next_pos = Max(next_pos, alpha, beta, depth=0)
+    return next_pos[0], next_pos[1]
 
 
+
+def Max(state, alpha, beta, depth=0):
+    if game_over(player1_list) or game_over(player2_list) or depth == 4:
+        return eval(all_list), None
+
+    value = -float('inf')
+    best_move = None
+
+    for child in get_children(state):  # child is the state of playboard, list of lists
+        eval_child, _ = Min(child, alpha, beta, depth + 1)
+        if eval_child > value:
+            value = eval_child
+            best_move = child[-1]
+        alpha = max(alpha, value)
+        if value >= beta:
+            break
+
+    return value, best_move
+
+
+def Min(state, alpha, beta, depth=0):
+    if game_over(player1_list) or game_over(player2_list) or depth == 4:
+        return eval(all_list), None
+
+    value = float('inf')
+    best_move = None
+
+    for child in get_children(state):  # child is the state of playboard, list of lists
+        eval_child, _ = Max(state, alpha, beta, depth + 1)
+        if eval_child < value:
+            value = eval_child
+            best_move = child
+        beta = min(beta, value)
+        if value <= alpha:
+            break
+
+    return value, best_move
+
+
+def get_children(state):
+    children = []
+    for row in range(NUM_ROW):
+        for col in range(NUM_COLUMN):
+            if (row, col) not in state:
+                new_state = state.copy()  
+                new_state.append((row, col))
+                children.append(new_state)  
+    return children
+# -----------------------------------------------------------------------------------------------------
 
 def play_the_chess():
     '''
