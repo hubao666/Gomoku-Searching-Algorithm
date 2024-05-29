@@ -10,7 +10,7 @@ BOX_WIDTH = 50              # width of an individual box
 NUM_COLUMN = SIZE
 NUM_ROW = SIZE
 CHESS_RADIUS = 20           # radius of chess
-MAX_DEPTH = 2
+MAX_DEPTH = 1
 
 player1_list = []  
 player2_list = []  
@@ -75,11 +75,11 @@ def game_over(player_list):
     https://cs.stackexchange.com/questions/86999/how-to-validate-a-connect-x-game-tick-tak-toe-gomoku
     I think it's really cool as it can check any number of chess in row for win condition
     '''
-    matrix = np.zeros((NUM_ROW, NUM_COLUMN))
+    matrix = np.zeros((NUM_ROW + 1, NUM_COLUMN + 1))
     for row, col in player_list:
         matrix[row, col] = 1
 
-    weights = np.array([2**i for i in range(NUM_ROW)])
+    weights = np.array([2**i for i in range(NUM_ROW + 1)])
     win_values = [sum(weights[i:i+CONNECT_N]) for i in range(len(weights) - CONNECT_N + 1)]
 
     ### Horiziontal
