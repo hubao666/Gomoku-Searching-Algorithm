@@ -1,8 +1,7 @@
 # Gomoku-Searching-Algorithm
-To run what we have so far, 
-- cd into the folder
-- enter 'python gomoku.py' on the command line
 
-In the playboard, to place a chess, you should press and hold the mouse and move it a little bit
+First finished version
+challanging but not clever enough
+still need to optimize and debug
 
-please make a new branch and update the AI Algo there
+2024/5/29
