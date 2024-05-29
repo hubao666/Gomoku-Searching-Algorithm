@@ -137,7 +137,7 @@ def Min(state, alpha, beta, depth=0):
     best_move = None
 
     for child in get_children(state):  # child is the state of playboard, list of lists
-        eval_child, _ = Max(state, alpha, beta, depth + 1)
+        eval_child, _ = Max(child, alpha, beta, depth + 1)
         if eval_child < value:
             value = eval_child
             best_move = child
