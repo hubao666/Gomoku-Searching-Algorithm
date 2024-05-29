@@ -10,14 +10,14 @@ BOX_WIDTH = 50              # width of an individual box
 NUM_COLUMN = SIZE
 NUM_ROW = SIZE
 CHESS_RADIUS = 20           # radius of chess
-MAX_DEPTH = 1
+MAX_DEPTH = 1               # can be only either 1 or 2 for now
 
 player1_list = []  
 player2_list = []  
 all_list = []  
 
 
-
+cut_count = 0
 
 def create_window():
     # Create the game board 
@@ -109,9 +109,13 @@ def ai_pos():
     return next_pos[0], next_pos[1]
 
 def Max(state, alpha, beta, depth=0):
+    global cut_count
     print(f"Max called with depth={depth}, state={state}, alpha={alpha}, beta={beta}")
     if game_over(player1_list) or game_over(player2_list) or depth == MAX_DEPTH:
-        evaluation = eval(state, isAI=False)
+        player1_list_copy = player1_list.copy()
+        player2_list_copy = player2_list.copy()
+
+        evaluation = eval(state, player1_list_copy, player2_list_copy, isAI=False)
         # print(f"Game over or max depth reached, evaluation={evaluation}")
         return evaluation, None
 
@@ -119,22 +123,33 @@ def Max(state, alpha, beta, depth=0):
     best_move = None
 
     for child in get_children(state):  # child is the state of playboard, list of lists
+        if MAX_DEPTH == 1:
+            eval_child, _ = Min(child, alpha, beta, depth + 1)
+        if MAX_DEPTH == 2:
+            eval_child, best_move = Min(child, alpha, beta, depth + 1)
+
         eval_child, _ = Min(child, alpha, beta, depth + 1)
         # print(f"Evaluating child in Max: {child}, eval_child={eval_child}")
         if eval_child > value:
             value = eval_child
-            best_move = child[-1]
+            best_move = child[-1]    
         alpha = max(alpha, value)
         if value >= beta:
+            cut_count += 1
+            print(f'MAX cut counts: {cut_count}')
             break
 
     print(f"Max returning value={value}, best_move={best_move}")
     return value, best_move
 
 def Min(state, alpha, beta, depth=0):
+    global cut_count
     # print(f"Min called with depth={depth}, state={state}, alpha={alpha}, beta={beta}")
     if game_over(player1_list) or game_over(player2_list) or depth == MAX_DEPTH:
-        evaluation = eval(state, isAI=True)
+        player1_list_copy = player1_list.copy()
+        player2_list_copy = player2_list.copy()
+
+        evaluation = eval(state, player1_list_copy, player2_list_copy, isAI=True)
         # print(f"Game over or max depth reached, evaluation={evaluation}")
         return evaluation, None
 
@@ -142,6 +157,11 @@ def Min(state, alpha, beta, depth=0):
     best_move = None
 
     for child in get_children(state):  # child is the state of playboard, list of lists
+        if MAX_DEPTH == 1:
+            eval_child, _ = Max(child, alpha, beta, depth + 1)
+        if MAX_DEPTH == 2:
+            eval_child, best_move = Max(child, alpha, beta, depth + 1)
+
         eval_child, _ = Max(child, alpha, beta, depth + 1)
         print(f"Evaluating child in Min: {child}, eval_child={eval_child}")
         if eval_child < value:
@@ -149,6 +169,8 @@ def Min(state, alpha, beta, depth=0):
             best_move = child[-1]
         beta = min(beta, value)
         if value <= alpha:
+            cut_count += 1
+            print(f'MIN cut counts: {cut_count}')
             break
 
     print(f"Min returning value={value}, best_move={best_move}")
@@ -309,25 +331,20 @@ def find_score(list1, list2):
     # print(total_score)
     return total_score
 
-def eval(state, isAI=None):
-
-    
+def eval(state, player1_list_copy, player2_list_copy, isAI=None):
+    human_list = player1_list_copy.copy()
+    ai_list = player2_list_copy.copy()
     if isAI:
-        ai_list = player2_list.copy()  
         ai_list.append(state[-1])
-        human_list = player1_list.copy()
     else:
-        human_list = player1_list.copy()
         human_list.append(state[-1])
-        ai_list = player2_list.copy()
-
 
     print(f'ai list{ai_list}')
     print(f'human list {human_list}')
 
     ai_score = find_score(ai_list, human_list)
     human_score = find_score(human_list, ai_list)
-    return ai_score - human_score*1.5
+    return ai_score - human_score*0.5
 
 def play_the_chess():
     '''
