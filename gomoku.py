@@ -4,7 +4,7 @@ import numpy as np
 # I will change the text at the end
 
 
-SIZE = 3                   # size of the board (square by default)
+SIZE = 15                   # size of the board (square by default)
 CONNECT_N = 5               # number of chess in a row to win the game, you can change this to test
 BOX_WIDTH = 50              # width of an individual box
 NUM_COLUMN = SIZE
@@ -111,7 +111,7 @@ def ai_pos():
 def Max(state, alpha, beta, depth=0):
     print(f"Max called with depth={depth}, state={state}, alpha={alpha}, beta={beta}")
     if game_over(player1_list) or game_over(player2_list) or depth == MAX_DEPTH:
-        evaluation = eval(state, isAI=True)
+        evaluation = eval(state, isAI=False)
         # print(f"Game over or max depth reached, evaluation={evaluation}")
         return evaluation, None
 
@@ -134,7 +134,7 @@ def Max(state, alpha, beta, depth=0):
 def Min(state, alpha, beta, depth=0):
     # print(f"Min called with depth={depth}, state={state}, alpha={alpha}, beta={beta}")
     if game_over(player1_list) or game_over(player2_list) or depth == MAX_DEPTH:
-        evaluation = eval(state, isAI=False)
+        evaluation = eval(state, isAI=True)
         # print(f"Game over or max depth reached, evaluation={evaluation}")
         return evaluation, None
 
@@ -312,7 +312,7 @@ def find_score(list1, list2):
 def eval(state, isAI=None):
 
     
-    if not isAI:
+    if isAI:
         ai_list = player2_list.copy()  
         ai_list.append(state[-1])
         human_list = player1_list.copy()
