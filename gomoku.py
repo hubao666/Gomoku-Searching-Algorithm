@@ -4,13 +4,13 @@ import numpy as np
 # I will change the text at the end
 
 
-SIZE = 15                   # size of the board (square by default)
+SIZE = 3                   # size of the board (square by default)
 CONNECT_N = 5               # number of chess in a row to win the game, you can change this to test
 BOX_WIDTH = 50              # width of an individual box
 NUM_COLUMN = SIZE
 NUM_ROW = SIZE
 CHESS_RADIUS = 20           # radius of chess
-
+MAX_DEPTH = 2
 
 player1_list = []  
 player2_list = []  
@@ -100,25 +100,27 @@ def game_over(player_list):
 
 # -----------------------------------------------------------------------------------------------------
 ### May 19th
-
 def ai_pos():
     next_pos = []
     alpha = -float('inf')
     beta = float('inf')
-    _, next_pos = Max(next_pos, alpha, beta, depth=0)
+    _, next_pos = Max(all_list, alpha, beta, depth=0)
+    print(f"AI chose position: {next_pos}")
     return next_pos[0], next_pos[1]
 
-
-
 def Max(state, alpha, beta, depth=0):
-    if game_over(player1_list) or game_over(player2_list) or depth == 4:
-        return eval(all_list), None
+    print(f"Max called with depth={depth}, state={state}, alpha={alpha}, beta={beta}")
+    if game_over(player1_list) or game_over(player2_list) or depth == MAX_DEPTH:
+        evaluation = eval(state, isAI=True)
+        # print(f"Game over or max depth reached, evaluation={evaluation}")
+        return evaluation, None
 
     value = -float('inf')
     best_move = None
 
     for child in get_children(state):  # child is the state of playboard, list of lists
         eval_child, _ = Min(child, alpha, beta, depth + 1)
+        # print(f"Evaluating child in Max: {child}, eval_child={eval_child}")
         if eval_child > value:
             value = eval_child
             best_move = child[-1]
@@ -126,26 +128,35 @@ def Max(state, alpha, beta, depth=0):
         if value >= beta:
             break
 
+    print(f"Max returning value={value}, best_move={best_move}")
     return value, best_move
 
-
 def Min(state, alpha, beta, depth=0):
-    if game_over(player1_list) or game_over(player2_list) or depth == 4:
-        return eval(all_list), None
+    # print(f"Min called with depth={depth}, state={state}, alpha={alpha}, beta={beta}")
+    if game_over(player1_list) or game_over(player2_list) or depth == MAX_DEPTH:
+        evaluation = eval(state, isAI=False)
+        # print(f"Game over or max depth reached, evaluation={evaluation}")
+        return evaluation, None
 
     value = float('inf')
     best_move = None
 
     for child in get_children(state):  # child is the state of playboard, list of lists
         eval_child, _ = Max(child, alpha, beta, depth + 1)
+        print(f"Evaluating child in Min: {child}, eval_child={eval_child}")
         if eval_child < value:
             value = eval_child
-            best_move = child
+            best_move = child[-1]
         beta = min(beta, value)
         if value <= alpha:
             break
 
+    print(f"Min returning value={value}, best_move={best_move}")
     return value, best_move
+
+# import random
+# def eval(state):
+#     return round(random.uniform(0, 100))
 
 
 def get_children(state):
@@ -153,11 +164,170 @@ def get_children(state):
     for row in range(NUM_ROW):
         for col in range(NUM_COLUMN):
             if (row, col) not in state:
-                new_state = state.copy()  
+                new_state = state.copy()
                 new_state.append((row, col))
-                children.append(new_state)  
+                children.append(new_state)
+    # print(f"Generated children: {children}")
     return children
 # -----------------------------------------------------------------------------------------------------
+eval_score = {
+    (0,0,0,1,0,0): 20,
+    (0,0,1,0,0,0): 20,
+    (0,0,1,0,1,0): 120,
+    (0,1,0,1,0,0): 120,
+    (0,0,1,1,0,0): 120,
+    (1,1,1,0,1): 720,
+    (1,0,1,1,1): 720,
+    (1,1,0,1,1): 720,
+    (0,1,1,1,1): 720,
+    (1,1,1,1,0): 720,
+    (0,1,0,1,1,0): 720,
+    (0,1,1,0,1,0): 720,
+    (0,0,1,1,1,0): 720,
+    (0,1,1,1,0,0): 720, 
+    (0,1,1,1,1,0): 4320,
+    (1,1,1,1,1): 50000
+}
+
+
+def find_score(list1, list2):
+    directions = [
+        (1, 0), ## check from (0,3) to (0,4), (3,5)
+        (0, 1), ## check from 
+        (1, 1), ## check from (3,3) to (4,4), (5,5)
+        (1, -1) ## check from (3,3) to (2,4), (3,5)
+    ]
+
+    total_score = 0             ## total score in the whole list
+
+    out_of_board_positions = ([(i, -1) for i in range(-1, 16)] + 
+                                    [(-1, i) for i in range(-1, 16)] +
+                                    [(i, 16) for i in range(-1, 16)] +
+                                    [(16, i) for i in range(-1, 16)])
+    check_exist = []
+    for point in list1:
+        m = point[0]
+        n = point[1]
+        cur_score = 0           ## score at one point in 4 directions
+        already_scored = []
+        score_shape = (0, None)
+        for x_directions, y_directions in directions: 
+            ## check if this shape is duplicate
+            ## eg. [(2,3), (2,4)]
+            ## (2,3) will have [(2,1), (2,2), (2,3), (2,4), (2,5), (2,6)], which is (0,0,1,1,0,0)
+            ## (2,4) will also iterate the above
+            ## so there is a duplicate
+            
+            is_duplicate = False
+            
+            for item in check_exist:
+                for pt in item[2]:
+                    if m == pt[0] and n == pt[1] and x_directions == item[0][0] and y_directions == item[0][1]:
+                        is_duplicate = True
+                        break
+                if is_duplicate:
+                    break
+            if is_duplicate:
+                continue        
+                
+            matrix_fiv = []
+            matrix_six = []
+            
+            max_score = 0           ## score at one point in one direction
+            new_shape = []          ## new shape for max score
+            
+
+            
+            
+            ## consider point = (2,3) in direction (1,0)
+            ## ① [(2,-2), (2,-1), (2,0), (2,1), (2,2), (2,3)] => (-1,-1,0,0,0,1)
+            ## ② [(2,-1), (2,0), (2,1), (2,2), (2,3), (2,4)]  => (-1,0,0,0,1,0)
+            ## ③ [(2,0), (2,1), (2,2), (2,3), (2,4), (2,5)]   => (0,0,0,1,0,0)
+            ## ④ [(2,1), (2,2), (2,3), (2,4), (2,5), (2,6)]   => (0,0,1,0,0,0)
+            ## ⑤ [(2,2), (2,3), (2,4), (2,5), (2,6), (2,7)]   => (0,1,0,0,0,0)
+            ## ⑥ [(2,3), (2,4), (2,5), (2,6), (2,8), (2,9)]   => (1,0,0,0,0,0)
+            ## in this case, ③ and ④ score 20 each
+            ## but we only take the max at one direction which is 20
+            for offset in range(-5, 1):
+                check = []
+                matrix_pos = []
+                for i in range(0, 6):
+                    row = m + (i + offset) * x_directions
+                    col = n + (i + offset) * y_directions                    
+                    current_position = (row, col)
+                    
+                    ## if out of board, append -1
+                    if current_position in out_of_board_positions:    
+                        check.append(-1)
+                    else:
+                        if current_position in list2:
+                            check.append(2)
+                        elif current_position in list1:
+                            check.append(1)
+                        else:
+                            check.append(0)
+                    matrix_pos.append(current_position)
+                iteration = (matrix_pos[0], matrix_pos[1], matrix_pos[2], matrix_pos[3], matrix_pos[4], matrix_pos[5])
+
+                ## put them in a tuple
+                check_fiv = (check[0], check[1], check[2], check[3], check[4])
+                check_six = (check[0], check[1], check[2], check[3], check[4], check[5])
+                
+                ## put them into a matrix
+                matrix_fiv.append(check_fiv)
+                matrix_six.append(check_six)
+                for shape in eval_score:
+                    
+                    score = eval_score[shape]
+                    for i in range(len(matrix_fiv)):
+                        if i < len(matrix_six):
+                            if matrix_fiv[i] == shape or matrix_six[i] == shape:         
+                                if score > max_score:
+                                    max_score = score
+                                    new_shape.append(shape)
+                                    
+                                    score_shape = ((x_directions, y_directions), score, iteration)
+                        else:
+                            if matrix_fiv[i] == shape:
+                                if score > max_score:
+                                    max_score = score  
+                                    new_shape.append(shape)      
+                                    score_shape = ((x_directions, y_directions), score, iteration)
+            ## calculate if two shape intersect at one point
+            ## than add the score together
+            # print(f"Max score in direction {x_directions, y_directions}: {max_score}")
+            ## print(f"Max shape in direction {x_directions, y_directions}: {new_shape}")
+            if max_score != 0:
+                cur_score = max_score + cur_score
+                ## print(score_shape)        
+                check_exist.append(score_shape)
+            ## print(matrix_six)
+        # print(check_exist)
+        # print(f"current score at this point {point}: {cur_score}")
+            
+        total_score = total_score + cur_score
+    # print(total_score)
+    return total_score
+
+def eval(state, isAI=None):
+
+    
+    if not isAI:
+        ai_list = player2_list.copy()  
+        ai_list.append(state[-1])
+        human_list = player1_list.copy()
+    else:
+        human_list = player1_list.copy()
+        human_list.append(state[-1])
+        ai_list = player2_list.copy()
+
+
+    print(f'ai list{ai_list}')
+    print(f'human list {human_list}')
+
+    ai_score = find_score(ai_list, human_list)
+    human_score = find_score(human_list, ai_list)
+    return ai_score - human_score*1.5
 
 def play_the_chess():
     '''
@@ -172,7 +342,7 @@ def play_the_chess():
     while not is_gameOver:
         
         if turn % 2 == 0:
-            pos1 = window.getMouse()                    # replace human's choice with AI's choice after implementing the algo
+            pos1 = window.getMouse()                    
             pos1_X = round((pos1.getX()) / BOX_WIDTH)
             pos1_Y = round((pos1.getY()) / BOX_WIDTH)
 
@@ -194,9 +364,9 @@ def play_the_chess():
                 turn += 1
 
         else:
-            pos2 = window.getMouse()
-            pos2_X = round((pos2.getX()) / BOX_WIDTH)
-            pos2_Y = round((pos2.getY()) / BOX_WIDTH)
+            pos2 = ai_pos()
+            pos2_X = pos2[0]
+            pos2_Y = pos2[1]
 
             if not ((pos2_X, pos2_Y) in all_list):
                 player2_list.append((pos2_X, pos2_Y))
@@ -232,4 +402,3 @@ def play_the_chess():
 # ----------------------------------------------------------------------------
 
 play_the_chess()
-
