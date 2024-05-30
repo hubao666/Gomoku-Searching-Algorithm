@@ -14,7 +14,7 @@ NUM_ROW = SIZE
 CHESS_RADIUS = 20  # radius of chess
 MAX_DEPTH = 2
 AI_NEWLY_PLACED_COLOR = 'light pink'
-DEFENSE_RATE = 3 # the higher the ai more likely to defense opponent
+DEFENSE_RATE = 3         # the higher the ai more likely to defense opponent
 
 player1_list = []
 player2_list = []
