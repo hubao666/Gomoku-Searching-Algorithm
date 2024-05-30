@@ -407,7 +407,7 @@ def play_the_chess():
                 player1_list.append((7, 7))
                 all_list.append((7, 7))
                 turn += 1
-                print('我在这')
+            
             
             else:
                 pos1 = AI_algo()
