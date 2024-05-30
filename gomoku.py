@@ -124,11 +124,11 @@ def order(empty_positions):
     return prioritized_list
 
 
-def AI_algo():
+def AI_algo(defense_rate=DEFENSE_RATE):
     next_pos = []
     alpha = -float('inf')
     beta = float('inf')
-    _, next_pos = Max(all_list, alpha, beta, depth=0)
+    _, next_pos = Max(all_list, alpha, beta, depth=0, defense_rate=defense_rate)
     print(f"AI chose position: {next_pos}")
     return next_pos[0], next_pos[1]
 
@@ -138,7 +138,7 @@ def hash_state(state):
 transposition_table_max = {}
 transposition_table_min = {}
 
-def Max(state, alpha, beta, depth=0):
+def Max(state, alpha, beta, depth=0, defense_rate=DEFENSE_RATE):
     global cut_count
     print(f"Max called with depth={depth}, state={state}, alpha={alpha}, beta={beta}")
     state_hash = hash_state(state)
@@ -148,7 +148,7 @@ def Max(state, alpha, beta, depth=0):
         player1_list_copy = player1_list.copy()
         player2_list_copy = player2_list.copy()
 
-        evaluation = eval(state, player1_list_copy, player2_list_copy, isAI=False)
+        evaluation = eval(state, player1_list_copy, player2_list_copy, isAI=False, defense_rate=defense_rate)
         # print(f"Game over or max depth reached, evaluation={evaluation}")
         return evaluation, None
 
@@ -157,7 +157,7 @@ def Max(state, alpha, beta, depth=0):
 
     for child in get_children(state):  # child is the state of playboard, list of lists
         if MAX_DEPTH == 1:
-            eval_child, _ = Min(child, alpha, beta, depth + 1)
+            eval_child, _ = Min(child, alpha, beta, depth + 1, defense_rate=defense_rate)
         elif MAX_DEPTH == 2:
             eval_child, best_move = Min(child, alpha, beta, depth + 1)
         else:
@@ -177,7 +177,7 @@ def Max(state, alpha, beta, depth=0):
     return value, best_move
 
 
-def Min(state, alpha, beta, depth=0):
+def Min(state, alpha, beta, depth=0, defense_rate=DEFENSE_RATE):
     global cut_count
     # print(f"Min called with depth={depth}, state={state}, alpha={alpha}, beta={beta}")
     state_hash = hash_state(state)
@@ -187,7 +187,7 @@ def Min(state, alpha, beta, depth=0):
         player1_list_copy = player1_list.copy()
         player2_list_copy = player2_list.copy()
 
-        evaluation = eval(state, player1_list_copy, player2_list_copy, isAI=True)
+        evaluation = eval(state, player1_list_copy, player2_list_copy, isAI=True, defense_rate=defense_rate)
         # print(f"Game over or max depth reached, evaluation={evaluation}")
         return evaluation, None
 
@@ -196,7 +196,7 @@ def Min(state, alpha, beta, depth=0):
 
     for child in get_children(state):  # child is the state of playboard, list of lists
         if MAX_DEPTH == 1:
-            eval_child, _ = Max(child, alpha, beta, depth + 1)
+            eval_child, _ = Max(child, alpha, beta, depth + 1, defense_rate=defense_rate)
         elif MAX_DEPTH == 2:
             eval_child, best_move = Max(child, alpha, beta, depth + 1)
         else:
@@ -370,7 +370,7 @@ def find_score(list1, list2):
     return total_score
 
 
-def eval(state, player1_list_copy, player2_list_copy, isAI=None):
+def eval(state, player1_list_copy, player2_list_copy, isAI=None, defense_rate=DEFENSE_RATE):
     human_list = player1_list_copy.copy()
     ai_list = player2_list_copy.copy()
     if isAI:
@@ -383,7 +383,7 @@ def eval(state, player1_list_copy, player2_list_copy, isAI=None):
 
     ai_score = find_score(ai_list, human_list)
     human_score = find_score(human_list, ai_list)
-    return ai_score - human_score * 0.1 * DEFENSE_RATE
+    return ai_score - human_score * 0.1 * defense_rate
 
 
 def play_the_chess():
@@ -393,7 +393,7 @@ def play_the_chess():
     ai_previous_piece = None
     first_stone = Circle(Point(BOX_WIDTH * 7, BOX_WIDTH * 7), CHESS_RADIUS)
     window = create_window()
-
+    
     turn = 0
     is_gameOver = False
 
@@ -410,7 +410,7 @@ def play_the_chess():
             
             
             else:
-                pos1 = AI_algo()
+                pos1 = AI_algo(defense_rate=3)
                 pos1_X = pos1[0]
                 pos1_Y = pos1[1]
 
@@ -432,7 +432,7 @@ def play_the_chess():
                     turn += 1
 
         else:
-            pos2 = AI_algo()
+            pos2 = AI_algo(defense_rate=1)
             pos2_X = pos2[0]
             pos2_Y = pos2[1]
 
