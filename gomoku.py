@@ -22,7 +22,7 @@ all_list = []
 
 cut_count = 0
 
-
+sss
 def create_window():
     # Create the game board
     window = GraphWin("Gomoku", BOX_WIDTH * NUM_COLUMN, BOX_WIDTH * NUM_ROW)
