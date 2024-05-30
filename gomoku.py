@@ -13,7 +13,7 @@ NUM_COLUMN = SIZE
 NUM_ROW = SIZE
 CHESS_RADIUS = 20  # radius of chess
 MAX_DEPTH = 2
-AI_NEWLY_PLACED_COLOR = 'light pink'
+AI_NEWLY_PLACED_COLOR = 'white'
 DEFENSE_RATE = 3         # the higher the ai more likely to defense opponent
 
 player1_list = []
@@ -22,7 +22,7 @@ all_list = []
 
 cut_count = 0
 
-sss
+
 def create_window():
     # Create the game board
     window = GraphWin("Gomoku", BOX_WIDTH * NUM_COLUMN, BOX_WIDTH * NUM_ROW)
@@ -391,6 +391,7 @@ def play_the_chess():
     main function that starts the game
     '''
     ai_previous_piece = None
+    first_stone = Circle(Point(BOX_WIDTH * 7, BOX_WIDTH * 7), CHESS_RADIUS)
     window = create_window()
 
     turn = 0
@@ -399,26 +400,36 @@ def play_the_chess():
     while not is_gameOver:
 
         if turn % 2 == 0:
-            pos1 = window.getMouse()
-            pos1_X = round((pos1.getX()) / BOX_WIDTH)
-            pos1_Y = round((pos1.getY()) / BOX_WIDTH)
-
-            if not ((pos1_X, pos1_Y) in all_list):
-                player1_list.append((pos1_X, pos1_Y))
-                all_list.append((pos1_X, pos1_Y))
-
-                piece1 = Circle(Point(BOX_WIDTH * pos1_X, BOX_WIDTH * pos1_Y), CHESS_RADIUS)
-                piece1.setFill('black')
-                piece1.draw(window)
-
-                if game_over(player1_list):
-                    message = Text(Point(600, 40), "black win.")
-                    message.setSize(20)
-                    message.draw(window)
-                    message.setStyle('bold italic')
-                    is_gameOver = True
-
+            if first_stone:
+                first_stone.setFill('black')
+                first_stone.draw(window)
+                first_stone = None
+                player1_list.append((7, 7))
+                all_list.append((7, 7))
                 turn += 1
+                print('我在这')
+            
+            else:
+                pos1 = AI_algo()
+                pos1_X = pos1[0]
+                pos1_Y = pos1[1]
+
+                if not ((pos1_X, pos1_Y) in all_list):
+                    player1_list.append((pos1_X, pos1_Y))
+                    all_list.append((pos1_X, pos1_Y))
+
+                    piece1 = Circle(Point(BOX_WIDTH * pos1_X, BOX_WIDTH * pos1_Y), CHESS_RADIUS)
+                    piece1.setFill('black')
+                    piece1.draw(window)
+
+                    if game_over(player1_list):
+                        message = Text(Point(600, 40), "black win.")
+                        message.setSize(20)
+                        message.draw(window)
+                        message.setStyle('bold italic')
+                        is_gameOver = True
+
+                    turn += 1
 
         else:
             pos2 = AI_algo()
