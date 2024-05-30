@@ -13,6 +13,8 @@ NUM_COLUMN = SIZE
 NUM_ROW = SIZE
 CHESS_RADIUS = 20  # radius of chess
 MAX_DEPTH = 2
+AI_NEWLY_PLACED_COLOR = 'light pink'
+DEFENSE_RATE = 3 # the higher the ai more likely to defense opponent
 
 player1_list = []
 player2_list = []
@@ -381,14 +383,14 @@ def eval(state, player1_list_copy, player2_list_copy, isAI=None):
 
     ai_score = find_score(ai_list, human_list)
     human_score = find_score(human_list, ai_list)
-    return ai_score - human_score * 0.1
+    return ai_score - human_score * 0.1 * DEFENSE_RATE
 
 
 def play_the_chess():
     '''
     main function that starts the game
     '''
-
+    ai_previous_piece = None
     window = create_window()
 
     turn = 0
@@ -405,9 +407,9 @@ def play_the_chess():
                 player1_list.append((pos1_X, pos1_Y))
                 all_list.append((pos1_X, pos1_Y))
 
-                piece = Circle(Point(BOX_WIDTH * pos1_X, BOX_WIDTH * pos1_Y), CHESS_RADIUS)
-                piece.setFill('black')
-                piece.draw(window)
+                piece1 = Circle(Point(BOX_WIDTH * pos1_X, BOX_WIDTH * pos1_Y), CHESS_RADIUS)
+                piece1.setFill('black')
+                piece1.draw(window)
 
                 if game_over(player1_list):
                     message = Text(Point(600, 40), "black win.")
@@ -427,9 +429,16 @@ def play_the_chess():
                 player2_list.append((pos2_X, pos2_Y))
                 all_list.append((pos2_X, pos2_Y))
 
-                piece = Circle(Point(BOX_WIDTH * pos2_X, BOX_WIDTH * pos2_Y), CHESS_RADIUS)
-                piece.setFill('white')
-                piece.draw(window)
+                if ai_previous_piece:
+                    ai_previous_piece.setFill('white')
+                    window.delItem(piece2)
+                    ai_previous_piece.draw(window)
+
+                piece2 = Circle(Point(BOX_WIDTH * pos2_X, BOX_WIDTH * pos2_Y), CHESS_RADIUS)
+                piece2.setFill(AI_NEWLY_PLACED_COLOR)
+                piece2.draw(window)
+
+                ai_previous_piece = piece2.clone()
 
                 if game_over(player2_list):
                     message = Text(Point(600, 40), "white win.")
