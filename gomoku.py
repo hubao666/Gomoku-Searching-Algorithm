@@ -80,7 +80,13 @@ def game_over(player_list):
         matrix[row, col] = 1
 
     weights = np.array([2**i for i in range(NUM_ROW + 1)])
-    win_values = [sum(weights[i:i+CONNECT_N]) for i in range(len(weights) - CONNECT_N + 1)]
+    win_values_5 = [sum(weights[i:i + CONNECT_N + 0]) for i in range(len(weights) - CONNECT_N + 1)]
+    win_values_6 = [sum(weights[i:i + CONNECT_N + 1]) for i in range(len(weights) - CONNECT_N + 1)]
+    win_values_7 = [sum(weights[i:i + CONNECT_N + 2]) for i in range(len(weights) - CONNECT_N + 1)]
+    win_values_8 = [sum(weights[i:i + CONNECT_N + 3]) for i in range(len(weights) - CONNECT_N + 1)]
+    win_values_9 = [sum(weights[i:i + CONNECT_N + 4]) for i in range(len(weights) - CONNECT_N + 1)]
+
+    win_values = win_values_5 + win_values_6 + win_values_7 + win_values_8 + win_values_9
 
     ### Horiziontal
     if any(value in win_values for value in np.dot(matrix, weights)):
