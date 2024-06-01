@@ -1,26 +1,27 @@
-from graphics import * 
+from graphics import *
 import numpy as np
+
 # The 'chess' refers to the 'stone' that players use, (either black or white)
 # I will change the text at the end
 
 
-SIZE = 15                   # size of the board (square by default)
-CONNECT_N = 5               # number of chess in a row to win the game, you can change this to test
-BOX_WIDTH = 50              # width of an individual box
+SIZE = 15  # size of the board (square by default)
+CONNECT_N = 5  # number of chess in a row to win the game, you can change this to test
+BOX_WIDTH = 50  # width of an individual box
 NUM_COLUMN = SIZE
 NUM_ROW = SIZE
-CHESS_RADIUS = 20           # radius of chess
-MAX_DEPTH = 1               # can be only either 1 or 2 for now
+CHESS_RADIUS = 20  # radius of chess
+MAX_DEPTH = 2  # can be only either 1 or 2 for now
 
-player1_list = []  
-player2_list = []  
-all_list = []  
-
+player1_list = []
+player2_list = []
+all_list = []
 
 cut_count = 0
 
+
 def create_window():
-    # Create the game board 
+    # Create the game board
     window = GraphWin("Gomoku", BOX_WIDTH * NUM_COLUMN, BOX_WIDTH * NUM_ROW)
     window.setBackground("light blue")
 
@@ -33,10 +34,6 @@ def create_window():
         line.draw(window)
 
     return window
-
-
-
-
 
 
 def rotateMatrix(matrix):
@@ -60,10 +57,12 @@ def rotateMatrix(matrix):
         diagonal_matrix.append(padded_diag)
 
     max_length = max(len(row) for row in diagonal_matrix)
-    diagonal_matrix = [np.pad(row, (0, max_length - len(row)), 'constant', constant_values=(0, 0)) for row in diagonal_matrix]
+    diagonal_matrix = [np.pad(row, (0, max_length - len(row)), 'constant', constant_values=(0, 0)) for row in
+                       diagonal_matrix]
 
-    weights = np.array([2**i for i in range(max_length)])
-    win_values = [sum(weights[i:i + CONNECT_N + offset]) for offset in range(5) for i in range(len(weights) - CONNECT_N - offset + 1)]
+    weights = np.array([2 ** i for i in range(max_length)])
+    win_values = [sum(weights[i:i + CONNECT_N + offset]) for offset in range(5) for i in
+                  range(len(weights) - CONNECT_N - offset + 1)]
 
     return (np.array(diagonal_matrix), weights, win_values)
 
@@ -81,8 +80,9 @@ def game_over(player_list):
     for row, col in player_list:
         matrix[row, col] = 1
 
-    weights = np.array([2**i for i in range(NUM_COLUMN)])
-    win_values = [sum(weights[i:i + CONNECT_N + offset]) for offset in range(5) for i in range(len(weights) - CONNECT_N - offset + 1)]
+    weights = np.array([2 ** i for i in range(NUM_COLUMN)])
+    win_values = [sum(weights[i:i + CONNECT_N + offset]) for offset in range(5) for i in
+                  range(len(weights) - CONNECT_N - offset + 1)]
 
     ### Horizontal
     if any(value in np.dot(matrix, weights) for value in win_values):
@@ -100,9 +100,34 @@ def game_over(player_list):
     return False
 
 
-# -----------------------------------------------------------------------------------------------------
-### May 19th
-def ai_pos():
+## check if each point has neighbor
+def has_neighbor(pt, board, radius=1):
+    for i in range(-radius, radius + 2):
+        for j in range(-radius, radius + 2):
+            if i == 0 and j == 0:
+                continue
+            if (pt[0] + i, pt[1] + j) in board:
+                return True
+    return False
+
+def order(empty_positions):
+    last_pt = all_list[-1]
+    prioritized_list = []
+    for point in empty_positions:
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                if i == 0 and j == 0:
+                    continue
+                neighbor = (last_pt[0] + i, last_pt[1] + j)
+                if neighbor in empty_positions:
+                    if neighbor not in prioritized_list:
+                        prioritized_list.insert(0, neighbor)
+    for point in empty_positions:
+        if point not in prioritized_list:
+            prioritized_list.append(point)
+    return prioritized_list
+
+def AI_algo():
     next_pos = []
     alpha = -float('inf')
     beta = float('inf')
@@ -110,8 +135,14 @@ def ai_pos():
     print(f"AI chose position: {next_pos}")
     return next_pos[0], next_pos[1]
 
+transition_table = {}
 def Max(state, alpha, beta, depth=0):
     global cut_count
+    board_tuple = tuple(map(tuple, state))
+
+    if board_tuple in transition_table:
+        return transition_table[board_tuple], None
+
     print(f"Max called with depth={depth}, state={state}, alpha={alpha}, beta={beta}")
     if game_over(player1_list) or game_over(player2_list) or depth == MAX_DEPTH:
         player1_list_copy = player1_list.copy()
@@ -129,23 +160,29 @@ def Max(state, alpha, beta, depth=0):
             eval_child, _ = Min(child, alpha, beta, depth + 1)
         if MAX_DEPTH == 2:
             eval_child, best_move = Min(child, alpha, beta, depth + 1)
-
-        eval_child, _ = Min(child, alpha, beta, depth + 1)
+        else:
+            eval_child, _ = Min(child, alpha, beta, depth + 1)
         # print(f"Evaluating child in Max: {child}, eval_child={eval_child}")
         if eval_child > value:
             value = eval_child
-            best_move = child[-1]    
+            best_move = child[-1]
         alpha = max(alpha, value)
         if value >= beta:
             cut_count += 1
             print(f'MAX cut counts: {cut_count}')
             break
-
+    transition_table[board_tuple] = value
     print(f"Max returning value={value}, best_move={best_move}")
     return value, best_move
 
+
 def Min(state, alpha, beta, depth=0):
     global cut_count
+    board_tuple = tuple(map(tuple, state))
+
+    if board_tuple in transition_table:
+        return transition_table[board_tuple], None
+
     # print(f"Min called with depth={depth}, state={state}, alpha={alpha}, beta={beta}")
     if game_over(player1_list) or game_over(player2_list) or depth == MAX_DEPTH:
         player1_list_copy = player1_list.copy()
@@ -161,10 +198,10 @@ def Min(state, alpha, beta, depth=0):
     for child in get_children(state):  # child is the state of playboard, list of lists
         if MAX_DEPTH == 1:
             eval_child, _ = Max(child, alpha, beta, depth + 1)
-        if MAX_DEPTH == 2:
+        elif MAX_DEPTH == 2:
             eval_child, best_move = Max(child, alpha, beta, depth + 1)
-
-        eval_child, _ = Max(child, alpha, beta, depth + 1)
+        else:
+            eval_child, _ = Max(child, alpha, beta, depth + 1)
         print(f"Evaluating child in Min: {child}, eval_child={eval_child}")
         if eval_child < value:
             value = eval_child
@@ -174,76 +211,69 @@ def Min(state, alpha, beta, depth=0):
             cut_count += 1
             print(f'MIN cut counts: {cut_count}')
             break
-
+    transition_table[board_tuple] = value
     print(f"Min returning value={value}, best_move={best_move}")
     return value, best_move
 
-# import random
-# def eval(state):
-#     return round(random.uniform(0, 100))
-
-
 def get_children(state):
+    empty_positions = [(row, col) for row in range(NUM_ROW) for col in range(NUM_COLUMN) if (row, col) not in state]
+    ordered_blanks = order(empty_positions)
     children = []
-    for row in range(NUM_ROW):
-        for col in range(NUM_COLUMN):
-            if (row, col) not in state:
-                new_state = state.copy()
-                new_state.append((row, col))
-                children.append(new_state)
+    for pos in ordered_blanks:
+        new_state = state.copy()
+        new_state.append(pos)
+        if has_neighbor(pos, state):
+            children.append(new_state)
     # print(f"Generated children: {children}")
     return children
-# -----------------------------------------------------------------------------------------------------
-eval_score = {
-    (0,0,0,1,0,0): 20,
-    (0,0,1,0,0,0): 20,
-    (0,0,1,0,1,0): 120,
-    (0,1,0,1,0,0): 120,
-    (0,0,1,1,0,0): 120,
-    (1,1,1,0,1): 720,
-    (1,0,1,1,1): 720,
-    (1,1,0,1,1): 720,
-    (0,1,1,1,1): 720,
-    (1,1,1,1,0): 720,
-    (0,1,0,1,1,0): 720,
-    (0,1,1,0,1,0): 720,
-    (0,0,1,1,1,0): 720,
-    (0,1,1,1,0,0): 720, 
-    (0,1,1,1,1,0): 4320,
-    (1,1,1,1,1): 50000
-}
 
+eval_score = {
+    (0, 0, 0, 1, 0, 0): 20,
+    (0, 0, 1, 0, 0, 0): 20,
+    (0, 0, 1, 0, 1, 0): 120,
+    (0, 1, 0, 1, 0, 0): 120,
+    (0, 0, 1, 1, 0, 0): 120,
+    (1, 1, 1, 0, 1): 720,
+    (1, 0, 1, 1, 1): 720,
+    (1, 1, 0, 1, 1): 720,
+    (0, 1, 1, 1, 1): 720,
+    (1, 1, 1, 1, 0): 720,
+    (0, 1, 0, 1, 1, 0): 720,
+    (0, 1, 1, 0, 1, 0): 720,
+    (0, 0, 1, 1, 1, 0): 720,
+    (0, 1, 1, 1, 0, 0): 720,
+    (0, 1, 1, 1, 1, 0): 4320,
+    (1, 1, 1, 1, 1): 999999
+}
 
 def find_score(list1, list2):
     directions = [
-        (1, 0), ## check from (0,3) to (0,4), (3,5)
-        (0, 1), ## check from 
-        (1, 1), ## check from (3,3) to (4,4), (5,5)
-        (1, -1) ## check from (3,3) to (2,4), (3,5)
+        (1, 0),  ## check from (0,3) to (0,4), (3,5)
+        (0, 1),  ## check from
+        (1, 1),  ## check from (3,3) to (4,4), (5,5)
+        (1, -1)  ## check from (3,3) to (2,4), (3,5)
     ]
 
-    total_score = 0             ## total score in the whole list
+    total_score = 0  ## total score in the whole list
 
-    out_of_board_positions = ([(i, -1) for i in range(-1, 16)] + 
-                                    [(-1, i) for i in range(-1, 16)] +
-                                    [(i, 16) for i in range(-1, 16)] +
-                                    [(16, i) for i in range(-1, 16)])
+    out_of_board_positions = ([(i, -1) for i in range(-1, 16)] +
+                              [(-1, i) for i in range(-1, 16)] +
+                              [(i, 16) for i in range(-1, 16)] +
+                              [(16, i) for i in range(-1, 16)])
     check_exist = []
     for point in list1:
         m = point[0]
         n = point[1]
-        cur_score = 0           ## score at one point in 4 directions
+        cur_score = 0  ## score at one point in 4 directions
         already_scored = []
         score_shape = (0, None)
-        for x_directions, y_directions in directions: 
+        for x_directions, y_directions in directions:
             ## check if this shape is duplicate
             ## eg. [(2,3), (2,4)]
             ## (2,3) will have [(2,1), (2,2), (2,3), (2,4), (2,5), (2,6)], which is (0,0,1,1,0,0)
             ## (2,4) will also iterate the above
             ## so there is a duplicate
-            
             is_duplicate = False
-            
             for item in check_exist:
                 for pt in item[2]:
                     if m == pt[0] and n == pt[1] and x_directions == item[0][0] and y_directions == item[0][1]:
@@ -252,17 +282,14 @@ def find_score(list1, list2):
                 if is_duplicate:
                     break
             if is_duplicate:
-                continue        
-                
+                continue
+
             matrix_fiv = []
             matrix_six = []
-            
-            max_score = 0           ## score at one point in one direction
-            new_shape = []          ## new shape for max score
-            
 
-            
-            
+            max_score = 0  ## score at one point in one direction
+            new_shape = []  ## new shape for max score
+
             ## consider point = (2,3) in direction (1,0)
             ## ① [(2,-2), (2,-1), (2,0), (2,1), (2,2), (2,3)] => (-1,-1,0,0,0,1)
             ## ② [(2,-1), (2,0), (2,1), (2,2), (2,3), (2,4)]  => (-1,0,0,0,1,0)
@@ -277,11 +304,11 @@ def find_score(list1, list2):
                 matrix_pos = []
                 for i in range(0, 6):
                     row = m + (i + offset) * x_directions
-                    col = n + (i + offset) * y_directions                    
+                    col = n + (i + offset) * y_directions
                     current_position = (row, col)
-                    
+
                     ## if out of board, append -1
-                    if current_position in out_of_board_positions:    
+                    if current_position in out_of_board_positions:
                         check.append(-1)
                     else:
                         if current_position in list2:
@@ -296,26 +323,26 @@ def find_score(list1, list2):
                 ## put them in a tuple
                 check_fiv = (check[0], check[1], check[2], check[3], check[4])
                 check_six = (check[0], check[1], check[2], check[3], check[4], check[5])
-                
+
                 ## put them into a matrix
                 matrix_fiv.append(check_fiv)
                 matrix_six.append(check_six)
                 for shape in eval_score:
-                    
+
                     score = eval_score[shape]
                     for i in range(len(matrix_fiv)):
                         if i < len(matrix_six):
-                            if matrix_fiv[i] == shape or matrix_six[i] == shape:         
+                            if matrix_fiv[i] == shape or matrix_six[i] == shape:
                                 if score > max_score:
                                     max_score = score
                                     new_shape.append(shape)
-                                    
+
                                     score_shape = ((x_directions, y_directions), score, iteration)
                         else:
                             if matrix_fiv[i] == shape:
                                 if score > max_score:
-                                    max_score = score  
-                                    new_shape.append(shape)      
+                                    max_score = score
+                                    new_shape.append(shape)
                                     score_shape = ((x_directions, y_directions), score, iteration)
             ## calculate if two shape intersect at one point
             ## than add the score together
@@ -323,15 +350,16 @@ def find_score(list1, list2):
             ## print(f"Max shape in direction {x_directions, y_directions}: {new_shape}")
             if max_score != 0:
                 cur_score = max_score + cur_score
-                ## print(score_shape)        
+                ## print(score_shape)
                 check_exist.append(score_shape)
             ## print(matrix_six)
         # print(check_exist)
         # print(f"current score at this point {point}: {cur_score}")
-            
+
         total_score = total_score + cur_score
     # print(total_score)
     return total_score
+
 
 def eval(state, player1_list_copy, player2_list_copy, isAI=None):
     human_list = player1_list_copy.copy()
@@ -346,22 +374,23 @@ def eval(state, player1_list_copy, player2_list_copy, isAI=None):
 
     ai_score = find_score(ai_list, human_list)
     human_score = find_score(human_list, ai_list)
-    return ai_score - human_score*0.5
+    return ai_score - human_score * 0.1
+
 
 def play_the_chess():
     '''
     main function that starts the game
     '''
-    
+
     window = create_window()
 
     turn = 0
     is_gameOver = False
 
     while not is_gameOver:
-        
+
         if turn % 2 == 0:
-            pos1 = window.getMouse()                    
+            pos1 = window.getMouse()
             pos1_X = round((pos1.getX()) / BOX_WIDTH)
             pos1_Y = round((pos1.getY()) / BOX_WIDTH)
 
@@ -383,7 +412,7 @@ def play_the_chess():
                 turn += 1
 
         else:
-            pos2 = ai_pos()
+            pos2 = AI_algo()
             pos2_X = pos2[0]
             pos2_Y = pos2[1]
 
@@ -406,6 +435,7 @@ def play_the_chess():
 
     window.getMouse()
     window.close()
+
 
 # ----------------------------------------------------------------------------
 ### IGNORE IT: There are still error with background music
