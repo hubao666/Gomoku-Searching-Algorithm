@@ -189,7 +189,7 @@ def Max(state, alpha, beta, depth=0):
             eval_child, best_move = Min(child, alpha, beta, depth + 1)
         else:
             eval_child, _ = Min(child, alpha, beta, depth + 1)
-        # print(f"Evaluating child in Max: {child}, eval_child={eval_child}")
+        print(f"Evaluating child in Max: {child}, eval_child={eval_child}")
         if eval_child > value:
             value = eval_child
             best_move = child[-1]
@@ -229,7 +229,7 @@ def Min(state, alpha, beta, depth=0):
             eval_child, best_move = Max(child, alpha, beta, depth + 1)
         else:
             eval_child, _ = Max(child, alpha, beta, depth + 1)
-        # print(f"Evaluating child in Min: {child}, eval_child={eval_child}")
+        print(f"Evaluating child in Min: {child}, eval_child={eval_child}")
         if eval_child < value:
             value = eval_child
             best_move = child[-1]
@@ -401,7 +401,7 @@ def eval(state, player1_list_copy, player2_list_copy, isAI=None):
 
     ai_score = find_score(ai_list, human_list)
     human_score = find_score(human_list, ai_list)
-    return ai_score - human_score * 0.1
+    return ai_score - human_score * 0.9
 
 
 def play_the_chess():
