@@ -6,7 +6,7 @@ import time
 # I will change the text at the end
 
 
-SIZE = 15  # size of the board (square by default)
+SIZE = 16  # size of the board (square by default)
 CONNECT_N = 5  # number of chess in a row to win the game, you can change this to test
 BOX_WIDTH = 50  # width of an individual box
 NUM_COLUMN = SIZE
@@ -27,12 +27,29 @@ def create_window():
     window = GraphWin("Gomoku", BOX_WIDTH * NUM_COLUMN, BOX_WIDTH * NUM_ROW)
     window.setBackground("light blue")
 
+    count = 1
+    for vertical_iterator in range(BOX_WIDTH, BOX_WIDTH * NUM_COLUMN , BOX_WIDTH):
+        message = Text(Point(vertical_iterator, BOX_WIDTH - 25), f"{count}")
+        message.setSize(20)
+        count += 1
+        message.draw(window)
+        
+    
     for vertical_iterator in range(0, BOX_WIDTH * NUM_COLUMN + 1, BOX_WIDTH):
-        line = Line(Point(vertical_iterator, 0), Point(vertical_iterator, BOX_WIDTH * NUM_COLUMN))
+        line = Line(Point(vertical_iterator, BOX_WIDTH), Point(vertical_iterator, BOX_WIDTH * NUM_COLUMN - BOX_WIDTH))
         line.draw(window)
 
+
+    count = 1
+    for horizontal_iterator in range(BOX_WIDTH, BOX_WIDTH * NUM_ROW, BOX_WIDTH):
+        message = Text(Point(BOX_WIDTH - 25, horizontal_iterator), f"{count}")
+        message.setSize(20)
+        count += 1
+        message.draw(window)
+
+
     for horizontal_iterator in range(0, BOX_WIDTH * NUM_ROW + 1, BOX_WIDTH):
-        line = Line(Point(0, horizontal_iterator), Point(BOX_WIDTH * NUM_ROW, horizontal_iterator))
+        line = Line(Point(BOX_WIDTH, horizontal_iterator), Point(BOX_WIDTH * NUM_ROW - BOX_WIDTH, horizontal_iterator))
         line.draw(window)
 
     return window
@@ -153,7 +170,7 @@ def Max(state, alpha, beta, depth=0):
     if board_tuple in transition_table:
         return transition_table[board_tuple], None
 
-    print(f"Max called with depth={depth}, state={state}, alpha={alpha}, beta={beta}")
+    # print(f"Max called with depth={depth}, state={state}, alpha={alpha}, beta={beta}")
     if game_over(player1_list) or game_over(player2_list) or depth == MAX_DEPTH:
         player1_list_copy = player1_list.copy()
         player2_list_copy = player2_list.copy()
@@ -182,7 +199,7 @@ def Max(state, alpha, beta, depth=0):
             print(f'MAX cut counts: {cut_count}')
             break
     transition_table[board_tuple] = value
-    print(f"Max returning value={value}, best_move={best_move}")
+    # print(f"Max returning value={value}, best_move={best_move}")
     return value, best_move
 
 
@@ -212,17 +229,17 @@ def Min(state, alpha, beta, depth=0):
             eval_child, best_move = Max(child, alpha, beta, depth + 1)
         else:
             eval_child, _ = Max(child, alpha, beta, depth + 1)
-        print(f"Evaluating child in Min: {child}, eval_child={eval_child}")
+        # print(f"Evaluating child in Min: {child}, eval_child={eval_child}")
         if eval_child < value:
             value = eval_child
             best_move = child[-1]
         beta = min(beta, value)
         if value <= alpha:
             cut_count += 1
-            print(f'MIN cut counts: {cut_count}')
+            # print(f'MIN cut counts: {cut_count}')
             break
     transition_table[board_tuple] = value
-    print(f"Min returning value={value}, best_move={best_move}")
+    # print(f"Min returning value={value}, best_move={best_move}")
     return value, best_move
 
 def get_children(state):
@@ -379,8 +396,8 @@ def eval(state, player1_list_copy, player2_list_copy, isAI=None):
     else:
         human_list.append(state[-1])
 
-    print(f'ai list{ai_list}')
-    print(f'human list {human_list}')
+    # print(f'ai list{ai_list}')
+    # print(f'human list {human_list}')
 
     ai_score = find_score(ai_list, human_list)
     human_score = find_score(human_list, ai_list)
