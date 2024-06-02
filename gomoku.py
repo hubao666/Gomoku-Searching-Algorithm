@@ -28,14 +28,11 @@ def create_window():
     window.setBackground("light blue")
 
     count = 1
-    for vertical_iterator in range(BOX_WIDTH, BOX_WIDTH * NUM_COLUMN , BOX_WIDTH):
+    for vertical_iterator in range(BOX_WIDTH, BOX_WIDTH * NUM_COLUMN, BOX_WIDTH):
         message = Text(Point(vertical_iterator, BOX_WIDTH - 25), f"{count}")
         message.setSize(20)
         count += 1
         message.draw(window)
-        
-    
-    for vertical_iterator in range(0, BOX_WIDTH * NUM_COLUMN + 1, BOX_WIDTH):
         line = Line(Point(vertical_iterator, BOX_WIDTH), Point(vertical_iterator, BOX_WIDTH * NUM_COLUMN - BOX_WIDTH))
         line.draw(window)
 
@@ -46,13 +43,18 @@ def create_window():
         message.setSize(20)
         count += 1
         message.draw(window)
-
-
-    for horizontal_iterator in range(0, BOX_WIDTH * NUM_ROW + 1, BOX_WIDTH):
         line = Line(Point(BOX_WIDTH, horizontal_iterator), Point(BOX_WIDTH * NUM_ROW - BOX_WIDTH, horizontal_iterator))
         line.draw(window)
 
-    return window
+
+    undo_button = Rectangle(Point(BOX_WIDTH * NUM_ROW - 5, 200),
+                            Point(BOX_WIDTH * (NUM_ROW-1) + 5, 230))
+    undo_button.setFill("light gray")
+    undo_button.draw(window)
+    undo_text = Text(undo_button.getCenter(), "Undo")
+    undo_text.draw(window)
+
+    return window, undo_button
 
 
 def rotateMatrix(matrix):
@@ -409,7 +411,7 @@ def play_the_chess():
     main function that starts the game
     '''
     global total_time, step_times
-    window = create_window()
+    window, undo_botton = create_window()
 
     turn = 0
     is_gameOver = False
