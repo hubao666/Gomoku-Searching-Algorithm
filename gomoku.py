@@ -283,10 +283,10 @@ def find_score(list1, list2):
 
     total_score = 0  ## total score in the whole list
 
-    out_of_board_positions = ([(i, -1) for i in range(-1, 16)] +
-                              [(-1, i) for i in range(-1, 16)] +
-                              [(i, 16) for i in range(-1, 16)] +
-                              [(16, i) for i in range(-1, 16)])
+    out_of_board_positions = ([(i, 0) for i in range(0, 17)] +
+                              [(0, i) for i in range(0, 17)] +
+                              [(i, 17) for i in range(0, 17)] +
+                              [(17, i) for i in range(0, 17)])
     check_exist = []
     for point in list1:
         m = point[0]
@@ -416,9 +416,12 @@ def play_the_chess():
 
     while not is_gameOver:
         if turn % 2 == 0:
-            pos1 = window.getMouse()
-            pos1_X = round((pos1.getX()) / BOX_WIDTH)
-            pos1_Y = round((pos1.getY()) / BOX_WIDTH)
+            while True:
+                pos1 = window.getMouse()
+                pos1_X = round((pos1.getX()) / BOX_WIDTH)
+                pos1_Y = round((pos1.getY()) / BOX_WIDTH)
+                if pos1_X != 0 and pos1_Y != 0 and pos1_X != SIZE and pos1_Y != SIZE:
+                    break
 
             if not ((pos1_X, pos1_Y) in all_list):
                 player1_list.append((pos1_X, pos1_Y))
