@@ -501,11 +501,10 @@ def play_the_chess():
 
 
                 
-                if can_i_change_color:
-                    if not i_just_undo:
-                        piece2.setFill('white')
-                        piece2.undraw()
-                        piece2.draw(window)
+                if can_i_change_color and not i_just_undo:
+                    piece2.setFill('white')
+                    piece2.undraw()
+                    piece2.draw(window)
 
                 i_just_undo = False
                 # if can_i_change_color:
