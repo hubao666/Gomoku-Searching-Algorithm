@@ -13,6 +13,7 @@ NUM_COLUMN = SIZE
 NUM_ROW = SIZE
 CHESS_RADIUS = 20  # radius of chess
 MAX_DEPTH = 2  # can be only either 1 or 2 for now
+AI_NEWLY_PLACED_COLOR = 'yellow'
 
 player1_list = []
 player2_list = []
@@ -425,6 +426,7 @@ def play_the_chess():
     '''
     main function that starts the game
     '''
+    ai_previous_piece = None
     global total_time, step_times, board_history
     window, undo_button = create_window()
 
@@ -481,9 +483,16 @@ def play_the_chess():
                 player2_list.append((pos2_X, pos2_Y))
                 all_list.append((pos2_X, pos2_Y))
 
+                if ai_previous_piece:
+                    ai_previous_piece.setFill('white')
+                    window.delItem(piece2)
+                    ai_previous_piece.draw(window)
+
                 piece2 = Circle(Point(BOX_WIDTH * pos2_X, BOX_WIDTH * pos2_Y), CHESS_RADIUS)
-                piece2.setFill('white')
+                piece2.setFill(AI_NEWLY_PLACED_COLOR)
                 piece2.draw(window)
+
+                ai_previous_piece = piece2.clone()
 
                 if game_over(player2_list):
                     message = Text(Point(600, 40), "white win.")
