@@ -191,7 +191,7 @@ def Max(state, alpha, beta, depth=0):
             eval_child, best_move = Min(child, alpha, beta, depth + 1)
         else:
             eval_child, _ = Min(child, alpha, beta, depth + 1)
-        print(f"Evaluating child in Max: {child}, eval_child={eval_child}")
+        # print(f"Evaluating child in Max: {child}, eval_child={eval_child}")
         if eval_child > value:
             value = eval_child
             best_move = child[-1]
@@ -231,7 +231,7 @@ def Min(state, alpha, beta, depth=0):
             eval_child, best_move = Max(child, alpha, beta, depth + 1)
         else:
             eval_child, _ = Max(child, alpha, beta, depth + 1)
-        print(f"Evaluating child in Min: {child}, eval_child={eval_child}")
+        # print(f"Evaluating child in Min: {child}, eval_child={eval_child}")
         if eval_child < value:
             value = eval_child
             best_move = child[-1]
@@ -405,33 +405,63 @@ def eval(state, player1_list_copy, player2_list_copy, isAI=None):
     human_score = find_score(human_list, ai_list)
     return ai_score - human_score * 0.9
 
+board_history = []
+
+def undo_move():
+    global player1_list, player2_list, all_list, board_history
+    if len(board_history) > 1:
+        # print(f'删除history之前:{board_history}')
+        board_history = board_history[:-2]
+        # print(f'删除history之后:{board_history}')
+        last_state = board_history[-1] 
+        # print(f'删除后的三个lists:{last_state}')
+        player1_list, player2_list, all_list = last_state 
+        print("Undo successful")
+    else:
+        print("Cannot undo")
+
 
 def play_the_chess():
     '''
     main function that starts the game
     '''
-    global total_time, step_times
-    window, undo_botton = create_window()
+    global total_time, step_times, board_history
+    window, undo_button = create_window()
 
     turn = 0
     is_gameOver = False
+    
 
     while not is_gameOver:
+        print('悔棋之前')
+        print(f'all list:{all_list}')
+        print(f'human list:{player1_list}')
+        print(f'ai list : {player2_list}')
+        board_history.append((player1_list.copy(), player2_list.copy(), all_list.copy()))
         if turn % 2 == 0:
             while True:
                 pos1 = window.getMouse()
                 pos1_X = round((pos1.getX()) / BOX_WIDTH)
                 pos1_Y = round((pos1.getY()) / BOX_WIDTH)
+                if (BOX_WIDTH * (NUM_ROW-1) + 5) < pos1.getX() < (BOX_WIDTH * NUM_ROW - 5) and \
+                        200 < pos1.getY() < 230:
+                    undo_move()
+                    window.delItem(piece1)
+                    window.delItem(piece2)
+                    print(f'all list:{all_list}')
+                    print(f'human list:{player1_list}')
+                    print(f'ai list : {player2_list}')
+                    continue
                 if pos1_X != 0 and pos1_Y != 0 and pos1_X != SIZE and pos1_Y != SIZE:
                     break
-
             if not ((pos1_X, pos1_Y) in all_list):
                 player1_list.append((pos1_X, pos1_Y))
                 all_list.append((pos1_X, pos1_Y))
 
-                piece = Circle(Point(BOX_WIDTH * pos1_X, BOX_WIDTH * pos1_Y), CHESS_RADIUS)
-                piece.setFill('black')
-                piece.draw(window)
+                piece1 = Circle(Point(BOX_WIDTH * pos1_X, BOX_WIDTH * pos1_Y), CHESS_RADIUS)
+                piece1.setFill('black')
+                piece1.draw(window)
+                
 
                 if game_over(player1_list):
                     message = Text(Point(600, 40), "black win.")
@@ -451,9 +481,9 @@ def play_the_chess():
                 player2_list.append((pos2_X, pos2_Y))
                 all_list.append((pos2_X, pos2_Y))
 
-                piece = Circle(Point(BOX_WIDTH * pos2_X, BOX_WIDTH * pos2_Y), CHESS_RADIUS)
-                piece.setFill('white')
-                piece.draw(window)
+                piece2 = Circle(Point(BOX_WIDTH * pos2_X, BOX_WIDTH * pos2_Y), CHESS_RADIUS)
+                piece2.setFill('white')
+                piece2.draw(window)
 
                 if game_over(player2_list):
                     message = Text(Point(600, 40), "white win.")
@@ -471,5 +501,4 @@ def play_the_chess():
         print(f"Step {i + 1}: {t:.4f} seconds")
     average_time = total_time / len(step_times)
     print(f"Average time per step: {average_time:.4f} seconds")
-
 play_the_chess()
