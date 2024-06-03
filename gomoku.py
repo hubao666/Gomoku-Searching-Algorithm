@@ -426,7 +426,8 @@ def play_the_chess():
     '''
     main function that starts the game
     '''
-    ai_previous_piece = None
+    can_i_change_color = False
+    i_just_undo = False
     global total_time, step_times, board_history
     window, undo_button = create_window()
 
@@ -446,15 +447,21 @@ def play_the_chess():
                 pos1 = window.getMouse()
                 pos1_X = round((pos1.getX()) / BOX_WIDTH)
                 pos1_Y = round((pos1.getY()) / BOX_WIDTH)
+                
                 if (BOX_WIDTH * (NUM_ROW-1) + 5) < pos1.getX() < (BOX_WIDTH * NUM_ROW - 5) and \
                         200 < pos1.getY() < 230 and can_i_undo:
                     undo_move()
+
+                    # window.delItem(piece1)
+                    # window.delItem(piece2)
+
                     piece1.undraw()
                     piece2.undraw()
                     print(f'all list:{all_list}')
                     print(f'human list:{player1_list}')
                     print(f'ai list : {player2_list}')
                     can_i_undo = False
+                    i_just_undo = True
                     continue
                 if pos1_X != 0 and pos1_Y != 0 and pos1_X != SIZE and pos1_Y != SIZE:
                     break
@@ -475,6 +482,7 @@ def play_the_chess():
                     is_gameOver = True
 
                 turn += 1
+                
 
         else:
             pos2 = AI_algo()
@@ -485,16 +493,33 @@ def play_the_chess():
                 player2_list.append((pos2_X, pos2_Y))
                 all_list.append((pos2_X, pos2_Y))
 
-                if ai_previous_piece:
-                    ai_previous_piece.setFill('white')
-                    window.delItem(piece2)
-                    ai_previous_piece.draw(window)
+                # if ai_previous_piece:
+                #     ai_previous_piece.setFill('white')
+                #     # window.delItem(piece2)
+                #     ai_previous_piece.draw(window)
+                #     can_i_change_color = False
 
+
+                
+                if can_i_change_color:
+                    if not i_just_undo:
+                        piece2.setFill('white')
+                        piece2.undraw()
+                        piece2.draw(window)
+
+                i_just_undo = False
+                # if can_i_change_color:
+                #     piece2.setFill('white')
+                #     piece2.undraw()
+                #     piece2.draw(window)
+                
                 piece2 = Circle(Point(BOX_WIDTH * pos2_X, BOX_WIDTH * pos2_Y), CHESS_RADIUS)
                 piece2.setFill(AI_NEWLY_PLACED_COLOR)
                 piece2.draw(window)
+                can_i_change_color = True
+                
 
-                ai_previous_piece = piece2.clone()
+                # ai_previous_piece = piece2.clone()
 
                 if game_over(player2_list):
                     message = Text(Point(600, 40), "white win.")
