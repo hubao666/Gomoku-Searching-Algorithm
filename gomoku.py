@@ -8,7 +8,7 @@ import time
 
 SIZE = 16  # size of the board (square by default)
 CONNECT_N = 5  # number of chess in a row to win the game, you can change this to test
-BOX_WIDTH = 50  # width of an individual box
+BOX_WIDTH = 60  # width of an individual box
 NUM_COLUMN = SIZE
 NUM_ROW = SIZE
 CHESS_RADIUS = 20  # radius of chess
@@ -448,8 +448,8 @@ def play_the_chess():
                 if (BOX_WIDTH * (NUM_ROW-1) + 5) < pos1.getX() < (BOX_WIDTH * NUM_ROW - 5) and \
                         200 < pos1.getY() < 230:
                     undo_move()
-                    window.delItem(piece1)
-                    window.delItem(piece2)
+                    piece1.undraw()
+                    piece2.undraw()
                     print(f'all list:{all_list}')
                     print(f'human list:{player1_list}')
                     print(f'ai list : {player2_list}')
