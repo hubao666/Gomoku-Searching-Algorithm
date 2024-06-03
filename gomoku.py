@@ -441,18 +441,20 @@ def play_the_chess():
         print(f'ai list : {player2_list}')
         board_history.append((player1_list.copy(), player2_list.copy(), all_list.copy()))
         if turn % 2 == 0:
+            can_i_undo = True
             while True:
                 pos1 = window.getMouse()
                 pos1_X = round((pos1.getX()) / BOX_WIDTH)
                 pos1_Y = round((pos1.getY()) / BOX_WIDTH)
                 if (BOX_WIDTH * (NUM_ROW-1) + 5) < pos1.getX() < (BOX_WIDTH * NUM_ROW - 5) and \
-                        200 < pos1.getY() < 230:
+                        200 < pos1.getY() < 230 and can_i_undo:
                     undo_move()
                     piece1.undraw()
                     piece2.undraw()
                     print(f'all list:{all_list}')
                     print(f'human list:{player1_list}')
                     print(f'ai list : {player2_list}')
+                    can_i_undo = False
                     continue
                 if pos1_X != 0 and pos1_Y != 0 and pos1_X != SIZE and pos1_Y != SIZE:
                     break
