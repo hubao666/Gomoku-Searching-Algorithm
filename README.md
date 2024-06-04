@@ -18,9 +18,11 @@ and it does not accept undoing and then playing the same move again.
    - Clone the Repository: Commands to clone the repository and navigate to the project directory.
 
 ## File Structure
-- AIvsAI (Easy Mode vs Expert Mode)
-- AIvsHuman (AI goes first)
-- AIvsHuman (AI goes second)
+- __gomoku.py__ :human player places a piece first
+- __AI_goes_first.py__ : AI places a piece first
+- __graphics.py__ : external library for UI design
+- AIvsAI (it's not on main branch, and we are still developing)
+
 
 ## Algorithm
 - Min-Max 
@@ -49,4 +51,5 @@ This reduces the search space and focuses on more critical moves first.
   - Evaluation function (including score parts)
 - Bao Hu 
   - UI design (including Undo button)
+  - Game logic and configuration
   - Min-Max algorithm (including Alpha-Beta pruning)
