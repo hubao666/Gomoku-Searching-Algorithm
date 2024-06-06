@@ -1,6 +1,10 @@
 from graphics import *
 import numpy as np
 import time
+import psutil
+process = psutil.Process()
+
+
 
 # The 'chess' refers to the 'stone' that players use, (either black or white)
 # I will change the text at the end
@@ -22,6 +26,13 @@ all_list = []
 cut_count = 0
 total_time = 0
 step_times = []
+
+
+def get_resource_usage():
+    cpu_usage = process.cpu_percent(interval=1)  
+    memory_info = process.memory_info()
+    memory_usage = memory_info.rss / (1024 * 1024) 
+    return cpu_usage, memory_usage
 
 def create_window():
     # Create the game board
@@ -125,7 +136,12 @@ def AI_algo():
     step_times.append(time_taken)
     ## print(f"AI chose position: {next_pos}")
     print(f"AI chose position: {next_pos} in {time_taken:.4f} seconds")
+
+    cpu_usage, memory_usage = get_resource_usage()
+    print(f"CPU usage: {cpu_usage:.2f}%, Memory usage: {memory_usage:.2f} MB")
+
     return next_pos[0], next_pos[1]
+
 
 transition_table = {}
 def Max(state, alpha, beta, depth=0):
@@ -240,8 +256,8 @@ eval_score = {
 
 def find_score(list1, list2):
     directions = [
-        (1, 0),  ## check from (0,3) to (0,4), (3,5)
-        (0, 1),  ## check from
+        (1, 0),  ## 
+        (0, 1),  ## 
         (1, 1),  ## check from (3,3) to (4,4), (5,5)
         (1, -1)  ## check from (3,3) to (2,4), (3,5)
     ]
@@ -366,7 +382,7 @@ def eval(state, player1_list_copy, player2_list_copy, isAI=None):
 
     ai_score = find_score(ai_list, human_list)
     human_score = find_score(human_list, ai_list)
-    return ai_score - human_score * 0.9
+    return ai_score - human_score * 0.3
 
 board_history = []
 
@@ -398,10 +414,10 @@ def play_the_chess():
     
 
     while not is_gameOver:
-        print('Before undo')
-        print(f'all list:{all_list}')
-        print(f'human list:{player1_list}')
-        print(f'ai list : {player2_list}')
+        # print('Before undo')
+        # print(f'all list:{all_list}')
+        # print(f'human list:{player1_list}')
+        # print(f'ai list : {player2_list}')
         board_history.append((player1_list.copy(), player2_list.copy(), all_list.copy()))
         if turn % 2 == 0:
             can_i_undo = True
