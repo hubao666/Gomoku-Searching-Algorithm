@@ -57,68 +57,30 @@ def create_window():
 
     return window, undo_button
 
-
-def rotateMatrix(matrix):
-    ## helper function that rotates the matrix so the diagonals are converted to rows
-    ## helper function for 'game_over()'
-    n, m = matrix.shape
-    diagonal_matrix = []
-
-    # Top-left to bottom-right diagonals
-    for offset in range(-n + 1, m):
-        diag = np.diagonal(matrix, offset=offset)
-        padded_diag = np.pad(diag, (max(0, -offset), max(0, offset)), 'constant', constant_values=(0, 0))
-        diagonal_matrix.append(padded_diag)
-
-    # Top-right to bottom-left diagonals
-    flipped_matrix = np.fliplr(matrix)
-    for offset in range(-n + 1, m):
-        diag = np.diagonal(flipped_matrix, offset=offset)
-        padded_diag = np.pad(diag, (max(0, -offset), max(0, offset)), 'constant', constant_values=(0, 0))
-        diagonal_matrix.append(padded_diag)
-
-    max_length = max(len(row) for row in diagonal_matrix)
-    diagonal_matrix = [np.pad(row, (0, max_length - len(row)), 'constant', constant_values=(0, 0)) for row in
-                       diagonal_matrix]
-
-    weights = np.array([2 ** i for i in range(max_length)])
-    win_values = [sum(weights[i:i + CONNECT_N + offset]) for offset in range(5) for i in
-                  range(len(weights) - CONNECT_N - offset + 1)]
-
-    return (np.array(diagonal_matrix), weights, win_values)
-
-
 def game_over(player_list):
-    '''
-    Parameter:
-    @player_list: the list that stores the coordinates of the chess that current player placed
+    directions = [(1, 0), (0, 1), (1, 1), (1, -1)]  # Directions: horizontal, vertical, two diagonals
 
-    Algorithm from
-    https://cs.stackexchange.com/questions/86999/how-to-validate-a-connect-x-game-tick-tak-toe-gomoku
-    I think it's really cool as it can check any number of chess in row for win condition
-    '''
-    matrix = np.zeros((NUM_ROW, NUM_COLUMN))
-    for row, col in player_list:
-        matrix[row, col] = 1
+    for x, y in player_list:
+        for dx, dy in directions:
+            count = 1
+            for i in range(1, CONNECT_N):
+                if (x + i * dx, y + i * dy) in player_list:
+                    count += 1
+                else:
+                    break
+            if count == CONNECT_N:
+                return True
 
-    weights = np.array([2 ** i for i in range(NUM_COLUMN)])
-    win_values = [sum(weights[i:i + CONNECT_N + offset]) for offset in range(5) for i in
-                  range(len(weights) - CONNECT_N - offset + 1)]
-
-    ### Horizontal
-    if any(value in np.dot(matrix, weights) for value in win_values):
-        return True
-
-    ### Vertical
-    if any(value in np.dot(matrix.T, weights) for value in win_values):
-        return True
-
-    ### Diagonally
-    result = rotateMatrix(matrix)
-    if any(value in np.dot(result[0], result[1]) for value in result[2]):
-        return True
-
+            count = 1
+            for i in range(1, CONNECT_N):
+                if (x - i * dx, y - i * dy) in player_list:
+                    count += 1
+                else:
+                    break
+            if count == CONNECT_N:
+                return True
     return False
+
 
 
 ## check if each point has neighbor
@@ -436,7 +398,7 @@ def play_the_chess():
     
 
     while not is_gameOver:
-        print('悔棋之前')
+        print('Before undo')
         print(f'all list:{all_list}')
         print(f'human list:{player1_list}')
         print(f'ai list : {player2_list}')
