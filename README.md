@@ -15,7 +15,6 @@ and it does not accept undoing and then playing the same move again.
 
 ## Installation
    - Instructions to ensure Python 3.x is installed and dependencies are installed using `pip`.
-   - Clone the Repository: Commands to clone the repository and navigate to the project directory.
 
 ## File Structure
 - AIvsAI (Easy Mode vs Expert Mode)
