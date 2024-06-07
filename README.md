@@ -47,7 +47,6 @@ This reduces the search space and focuses on more critical moves first.
   - Optimization
   - Evaluation function (including score parts)
   - Undo button and function 
-  - README
 - Bao Hu 
   - UI design (basic grid board)
   - Game logic and configuration
