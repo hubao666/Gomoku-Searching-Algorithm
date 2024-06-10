@@ -382,7 +382,7 @@ def eval(state, player1_list_copy, player2_list_copy, isAI=None):
 
     ai_score = find_score(ai_list, human_list)
     human_score = find_score(human_list, ai_list)
-    return ai_score - human_score * 0.3
+    return ai_score - human_score * 0.2
 
 board_history = []
 
