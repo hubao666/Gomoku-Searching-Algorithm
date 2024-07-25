@@ -17,7 +17,6 @@ and it does not accept undoing and then playing the same move again.
    - Instructions to ensure Python 3.x is installed and dependencies are installed using `pip`.
 
 ## File Structure
-- AIvsAI (Easy Mode vs Expert Mode)
 - AIvsHuman (AI goes first)
 - AIvsHuman (AI goes second)
 
@@ -46,7 +45,9 @@ This reduces the search space and focuses on more critical moves first.
 - Pengyu Chen 
   - Optimization
   - Evaluation function (including score parts)
-  - Undo button and function 
+  - Undo button and function
+  - Min-Max algorithm (including Alpha-Beta pruning)
+  - UI design
 - Bao Hu 
   - UI design (basic grid board)
   - AI's newest yellow stone
