@@ -49,4 +49,5 @@ This reduces the search space and focuses on more critical moves first.
   - UI design and implementation
   - Game logic and configuration
   - Min-Max algorithm (including Alpha-Beta pruning)
+  - Optimization
   
