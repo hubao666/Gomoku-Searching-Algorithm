@@ -21,17 +21,13 @@ and it does not accept undoing and then playing the same move again.
 - AIvsHuman (AI goes second)
 
 ## Algorithm
-- Min-Max 
+- Min-Max
+  - A recursive method used for decision-making in two-player zero-sum games (such as chess, tic-tac-toe). The algorithm evaluates all possible moves in the game to choose the best possible strategy. Each node in the game tree represents a state of the game, and two players alternate turns: one trying to maximize their score (Max) and the other trying to minimize the opponent's score (Min).
+  - Alpha-Beta pruning is an optimization technique for the Min-Max algorithm. It reduces the number of nodes that need to be evaluated in the game tree, making the algorithm more efficient. The key idea is to "prune" branches that will not affect the final decision. 
   - We aim to look ahead enough to make intelligent moves without overwhelming the system with too many calculations.
 While deeper searches can yield better evaluation scores, they do not always translate to better moves in practice. 
-Therefore, we optimize the depth to maintain a balance between performance and move quality.
+Therefore, we optimize the depth to maintain a balance between time cost and move quality.
 
-- Alpha-Beta pruning
-  - The depth we use for clever version is only 2 because we found that depth of 2 
-works pretty good, and it does not take too much time. Also, depth of 3 may find a better
-evaluation score, but Min-Max is DFS and a better evaluation score does not mean 
-a better move. It does not guarantee a better move, but it indeed means a longer time.
-So we choose depth of 2.
 
 - Optimization 
   - The `has_neighbor` function checks if a given point has neighboring stones within radius of 1 .
@@ -48,8 +44,9 @@ This reduces the search space and focuses on more critical moves first.
   - Undo button and function
   - Min-Max algorithm (including Alpha-Beta pruning)
   - UI design
+    
 - Bao Hu 
-  - UI design (basic grid board)
-  - AI's newest yellow stone
+  - UI design and implementation
   - Game logic and configuration
   - Min-Max algorithm (including Alpha-Beta pruning)
+  
